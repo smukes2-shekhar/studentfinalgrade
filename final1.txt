@@ -1,0 +1,439 @@
+---
+title: "Project 2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Part 0 – Reading data
+After you finish Project 1, you created 4 data files ( CSV files). You will use those in Project 2.
+Read these files and recreate the corresponding dataframes.
+mydataFinal, ACTIVE and INACTIVE
+
+``` {r Part 0}
+# setwd("C:/Users/TheEmbers/Desktop")  #Laptop
+#setwd("C:/Users/dembers/Documents/Spring 2020")  # UIC Office Computer
+# setwd("C:/Users/dembers/Documents") #Changes working directory #UIC LAB
+setwd("C:/Users/lembe/OneDrive/Documents/Dale Teaching Spring 2020/Stat 382") # Den Computer
+
+#mydataFinal <- read.csv("mydataFinal.csv", sep =",")
+ACTIVE <- read.csv("ACTIVE.csv", sep =",")
+#INACTIVE <- read.csv("INACTIVE.csv", sep =",")
+```
+
+Part 4 – General Analysis of grades
+(20 points)
+From now on we will work with the ACTIVE dataframe.
+
+1)	Assign a letter grade to each student using a 90-80-70-60 scale.
+
+```{r 4.1}
+ACTIVE$LetterGrade[ACTIVE$final_grade >= 90] <- "A"
+ACTIVE$LetterGrade[ACTIVE$final_grade >= 80 & ACTIVE$final_grade < 90] <- "B"
+ACTIVE$LetterGrade[ACTIVE$final_grade >= 70 & ACTIVE$final_grade < 80] <- "C"
+ACTIVE$LetterGrade[ACTIVE$final_grade >= 60 & ACTIVE$final_grade < 70] <- "D"
+ACTIVE$LetterGrade[ACTIVE$final_grade < 60] <- "F"
+
+```
+
+2)	Create a Barplot for Letter grades for the entire class
+```{r 4.2}
+ACTIVE$LetterGrade <- as.factor(ACTIVE$LetterGrade)
+barplot(table(ACTIVE$LetterGrade))  #Decorate, label, and color as desired.
+```
+
+3)	Create a Histogram with 10 bars of Final grade and one for Final Exam to identify the class overall picture. The two histograms should be presented next to each other – use par() command for this, review par() and mfrow() commands, to present the histograms in parallel.
+
+```{r 4.3}
+par(mfrow = c(1,2))
+hist(ACTIVE$FINALEXAM, breaks = 10)
+hist(ACTIVE$final_grade, breaks = 10)
+par(mfrow = c(1,1))
+```
+
+4)	What is the standard deviation of the Final grade and that of Final Exam?
+```{r 4.4}
+sd(ACTIVE$final_grade)
+sd(ACTIVE$FINALEXAM)
+```
+
+5)	Run the cor() command ( research it) on Final grade and final Exam, what is the result?
+
+```{r 4.5}
+cor(ACTIVE$final_grade,ACTIVE$FINALEXAM)
+```
+
+
+6)	Create a scatterplot comparing final Exam and final grade. What do you observe?
+
+```{r 4.6}
+plot(ACTIVE$final_grade,ACTIVE$FINALEXAM)  #Decorate, label, and color as desired.
+```
+
+Question 4) After you complete the above 5 steps, conclude if the final exam and the final grade in class are correlated? Are the standard deviations high? If yes, what should you do (omitting data possible) to get a better picture?
+
+Answer:  They are strongly correlated as evidence by the high correlation and the scatterplot.   The standard deviations are high.  One might want to
+eliminate the zeros.
+
+7)	Create a Scatterplot matrix between HW average, WH average, Disc grade, LP and final grade.
+```{r 4.7}
+pairs(ACTIVE[c("hw_avg","written_avg","discussion","LECTURE.PARTICIPATION","final_grade")])
+```
+
+8)	Create a scatterplot matrix between HW average, WH average, Disc grade, LP and final Exam.
+```{r 4.8}
+pairs(ACTIVE[c("hw_avg","written_avg","discussion","LECTURE.PARTICIPATION","FINALEXAM")])
+```
+
+
+Question 5) What appears to be the best indicator (from HW average, WH average, Disc grade, LP) of the Final Grade?  What appears to be the best indicator (from HW average, WH average, Disc grade, LP)  the Final Exam? Explain based on the matrices.
+
+Answer:  Trying to guess the most linear, I would guess hw_avg for final_grade and FINALEXAM.  written_avg looks good too.
+
+
+9)	Combine Lecture Participation and Discussion Participation (DP) to create a new variable,total_participation. The maximum grades for total_participation is 43. 
+
+```{r 4.9}
+ACTIVE$total_participation <- ACTIVE$LECTURE.PARTICIPATION+ACTIVE$dpcount
+```
+
+
+Create another variable Participation, that is a categorical variable. 
+a.	Participation = High if total_participation >36 
+b.	Participation = highaverage if 36>= total_participation >31
+c.	c. Participation = average if 31>= total_participation >25
+d.	d. Participation = lowaverage if 25>= total_participation >18
+e.	e. Participation = Low if total_participation  =<18
+
+```{r 4.9 pt 2}
+ACTIVE$Participation[ACTIVE$total_participation > 36] <- "High"
+ACTIVE$Participation[ACTIVE$total_participation > 31 & ACTIVE$total_participation <= 36] <- "highaverage"
+ACTIVE$Participation[ACTIVE$total_participation > 25 & ACTIVE$total_participation <= 31] <- "average"
+ACTIVE$Participation[ACTIVE$total_participation > 18 & ACTIVE$total_participation <= 25] <- "lowaverage"
+ACTIVE$Participation[ACTIVE$total_participation <= 18] <- "Low"
+```
+
+
+Part 5 – Visual dissection of Grades
+(20 points)
+We are now ready to work with each of the assignments. We will revert back to mydataFinal. But we only care for the Available students in that dataframe.
+1)	Create a histogram, boxplot, and a qqnorm ( include a qqline) – presented horizontally for each of HW average, WH average, Exam 1, Exam 2, Exam 3, and Final Exam.
+
+```{r 5.1}
+# I am just going to use ACTIVE
+
+par(mfrow = c(1,3))
+hist(ACTIVE$hw_avg )
+boxplot(ACTIVE$hw_avg)
+qqnorm(ACTIVE$hw_avg )
+qqline(ACTIVE$hw_avg)
+
+
+hist(ACTIVE$written_avg )
+boxplot(ACTIVE$written_avg)
+qqnorm(ACTIVE$written_avg )
+qqline(ACTIVE$written_avg)
+
+hist(ACTIVE$EXAM1 )
+boxplot(ACTIVE$EXAM1)
+qqnorm(ACTIVE$EXAM1 )
+qqline(ACTIVE$EXAM1)
+
+hist(ACTIVE$EXAM2 )
+boxplot(ACTIVE$EXAM2)
+qqnorm(ACTIVE$EXAM2 )
+qqline(ACTIVE$EXAM2)
+
+hist(ACTIVE$EXAM3 )
+boxplot(ACTIVE$EXAM3)
+qqnorm(ACTIVE$EXAM3)
+qqline(ACTIVE$EXAM3)
+
+hist(ACTIVE$FINALEXAM )
+boxplot(ACTIVE$FINALEXAM)
+qqnorm(ACTIVE$FINALEXAM )
+qqline(ACTIVE$FINALEXAM)
+
+par(mfrow = c(1,1))
+
+```
+
+
+
+
+2)	Are there any outliers? If yes, use boxplot.stats  or a method of your choosing to identify the outliers for all cases.
+
+```{r 5.2}
+
+boxplot.stats(ACTIVE$hw_avg)$out
+boxplot.stats(ACTIVE$written_avg)$out
+boxplot.stats(ACTIVE$EXAM1)$out
+boxplot.stats(ACTIVE$EXAM2)$out
+boxplot.stats(ACTIVE$EXAM3)$out
+boxplot.stats(ACTIVE$FINALEXAM)$out
+
+
+```
+
+Answer:  There are several outliers.
+
+Question 6) Review your graphs and the trends, do they follow the normal distribution in anyway? Did you expect that? Why?
+
+Answer:  I think none are normal, all skewed left.  qqplots are not lines.  Expected a lot of 0s to skew the data.
+
+3)	How many students completed Exam 1, Exam 2, Exam 3, and Final Exam? 
+
+```{r 5.3}
+
+took <- c(sum(ACTIVE$EXAM1 >0),sum(ACTIVE$EXAM2 >0),sum(ACTIVE$EXAM3 >0),sum(ACTIVE$FINALEXAM >0))
+took
+```
+
+4)	Separate the students to those who completed each of the exams and those who didn’t and present a table with 2 rows (Took the Exam or Not) and 4 column variables from step 3.
+
+```{r 5.4}
+
+not_took <- c(sum(ACTIVE$EXAM1 == 0),sum(ACTIVE$EXAM2 == 0),sum(ACTIVE$EXAM3 == 0),sum(ACTIVE$FINALEXAM == 0))
+
+
+exams <-rbind(took,not_took)
+
+rownames(exams) <- c("Took Exam", "Did Not Take Exam")
+colnames(exams) <- c("EXAM1", "EXAM2", "EXAM3", "FINALEXAM")
+
+exams
+```
+
+5)	Create 4 barplots for step 4 and present them horizontally.
+
+```{r 5.5}
+par(mfrow = c(1,4))
+barplot(exams[,1]) #Decorate, label, and color as desired.
+barplot(exams[,2]) #Decorate, label, and color as desired.
+barplot(exams[,3]) #Decorate, label, and color as desired.
+barplot(exams[,4]) #Decorate, label, and color as desired.
+par(mfrow = c(1,1))
+
+```
+
+
+
+Part 6 – Analysis by TA 
+(20 points)
+You should work with the dataframe ACTIVE and NOT use a temporary dataframe for the following steps.
+
+1)	Repeat step 4 in Part 5 by TA and create a table showing this information ( TA# on the rows)
+```{r 6.1}
+## Doing this by subsets due to time.
+TA1<-ACTIVE[ACTIVE$TA.NUMBER=="TA1B",]
+TA2<-ACTIVE[ACTIVE$TA.NUMBER=="TA2F",]
+TA3<-ACTIVE[ACTIVE$TA.NUMBER=="TA3M",]
+TA4<-ACTIVE[ACTIVE$TA.NUMBER=="TA4R",]
+TA5<-ACTIVE[ACTIVE$TA.NUMBER=="TA5K",]
+
+TA1took<-c(colSums(TA1[5]>0),colSums(TA1[6]>0),colSums(TA1[7]>0),colSums(TA1[8]>0))
+TA2took<-c(colSums(TA2[5]>0),colSums(TA2[6]>0),colSums(TA2[7]>0),colSums(TA2[8]>0))
+TA3took<-c(colSums(TA3[5]>0),colSums(TA3[6]>0),colSums(TA3[7]>0),colSums(TA3[8]>0))
+TA4took<-c(colSums(TA4[5]>0),colSums(TA4[6]>0),colSums(TA4[7]>0),colSums(TA4[8]>0))
+TA5took<-c(colSums(TA5[5]>0),colSums(TA5[6]>0),colSums(TA5[7]>0),colSums(TA5[8]>0))
+
+
+TA1not<-c(colSums(TA1[5]==0),colSums(TA1[6]==0),colSums(TA1[7]==0),colSums(TA1[8]==0))
+TA2not<-c(colSums(TA2[5]==0),colSums(TA2[6]==0),colSums(TA2[7]==0),colSums(TA2[8]==0))
+TA3not<-c(colSums(TA3[5]==0),colSums(TA3[6]==0),colSums(TA3[7]==0),colSums(TA3[8]==0))
+TA4not<-c(colSums(TA4[5]==0),colSums(TA4[6]==0),colSums(TA4[7]==0),colSums(TA4[8]==0))
+TA5not<-c(colSums(TA5[5]==0),colSums(TA5[6]==0),colSums(TA5[7]==0),colSums(TA5[8]==0))
+
+
+combined <- rbind(TA1took,TA1not,TA2took,TA2not,TA3took,TA3not,TA4took,TA4not,TA5took,TA5not)
+
+combined
+
+```
+
+2)	Create a table for Letter Grades by TA 
+
+```{r 6.2}
+
+table(ACTIVE$LetterGrade,ACTIVE$TA.NUMBER)
+
+```
+3)	Create boxplots of the final grade for each TA, present them next to each other. (make sure the ylim are the same for all).
+```{r 6.3}
+
+boxplot(ACTIVE$final_grade ~ACTIVE$TA.NUMBER)
+
+```
+
+
+4)	Create a table for DP by TA, what do you observe?
+
+```{r 6.4}
+
+table(ACTIVE$dpcount,ACTIVE$TA.NUMBER)
+
+```
+
+TA4R has good numbers, TA5K not so much.
+
+5)	Create 5 parallel barplots one for each TA by letter grade, what do you observe – This should be ONE barplot.
+```{r 6.5}
+
+barplot(table(ACTIVE$LetterGrade,ACTIVE$TA.NUMBER), legend = TRUE,beside = TRUE)
+
+```
+6)	Compute the sd for final grade by TA, are there any big differences?
+```{r 6.6}
+
+tapply(ACTIVE$final_grade,ACTIVE$TA.NUMBER,sd)
+
+```
+
+3M and 5K are large!
+
+7)	Compute the cor() by TA between DP and final grade. What do you observe?
+
+```{r 6.7}
+
+by(ACTIVE[63:64], list(ACTIVE$TA.NUMBER), cor)
+
+```
+
+1B not so strong of correlation, similar 4R
+
+8)	Run Summary for finalgrades in by TA
+```{r 6.8}
+
+tapply(ACTIVE$final_grade,ACTIVE$TA.NUMBER,summary)
+
+```
+
+Question 7) Review your graphs and the trends, are there obvious differences between TAs? How do you conclude this? Are there outlier observations for any of the TAs? 
+
+1B and 2F seem good. 5K has some issues.
+
+Part 7 – Analysis by Lecture participation
+(20 points)
+Continue with dataframe ACTIVE.
+1)	Run summary on LP.
+```{r 7.1}
+
+summary(ACTIVE$LECTURE.PARTICIPATION)
+
+```
+2)	Create a 5 bar histogram for LP
+```{r 7.2}
+
+hist(ACTIVE$LECTURE.PARTICIPATION, breaks = c(0,7,14,21,28,35))
+
+```
+
+
+3)	Create 5 scatterplots for Final Grade, Final Exam, and Exams1,2,3 vs LP ( LP on the x axis) show them horizontally next to each other.
+```{r 7.3}
+
+par(mfrow = c(1,5))
+plot(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$final_grade) #Decorate, label, and color as desired.
+plot(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$FINALEXAM)#Decorate, label, and color as desired.
+plot(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$EXAM1)#Decorate, label, and color as desired.
+plot(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$EXAM2)#Decorate, label, and color as desired.
+plot(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$EXAM3)#Decorate, label, and color as desired.
+par(mfrow = c(1,1))
+
+
+```
+
+4)	Run cor() between LP and each of the above grades, what do you observe?
+```{r 7.4}
+
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$final_grade) 
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$FINALEXAM)
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$EXAM1)
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$EXAM2)
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$EXAM3)
+
+
+```
+
+Not a lot of  correlation with lecture participation.
+
+Question 9) are there any major differences? Why? What other ways can you find to identify how important Lecture participation is and how this affects the final grade?
+
+Final Exam has the most correlation.  Possibly lots of 0s with low participation?  Maybe remove 0s and recompute.
+
+5)	Run cor() of LP with WH, HW average
+
+```{r 7.5}
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$written_avg)
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$hw_avg)
+
+```
+6)	Run cor() of DP with WH, HW average what do you observe?
+```{r 7.6}
+cor(ACTIVE$dpcount ,ACTIVE$written_avg)
+cor(ACTIVE$dpcount,ACTIVE$hw_avg)
+
+```
+
+Discussion strongly correlated with homework, lecture not so much.  One gets homework help in discussion (or TAs are way more effective than instructors!)
+
+
+Part 8 – General Participation
+(20 points)
+Let’s try to understand if participation in general affects their grades
+1)	Run summary for Participation
+```{r 8.1}
+
+summary(ACTIVE$Participation)  # probably makes more sense for total_participation
+
+```
+
+2)	Create a barplot for Participation.
+```{r 8.2}
+
+barplot(table(ACTIVE$Participation)) #Decorate, label, and color as desired.
+
+```
+3)	Create boxplots for Final Exam vs Participation ( one boxplot for each participation category, do this using similar to:
+boxplot(ACTIVE$Participation, ACTIVE$Final, xlab = "Participation", ylab = "Final Grade",….)
+
+```{r 8.3}
+
+boxplot(ACTIVE$FINALEXAM~ACTIVE$Participation)
+
+```
+
+4)	Create boxplots for Final Grade vs Participation ( one boxplot for each participation category, do this using similar to:
+boxplot(ACTIVE$Participation, ACTIVE$Final, xlab = "Participation", ylab = "Final Grade",….)
+
+```{r 8.4}
+
+boxplot(ACTIVE$final_grade~ACTIVE$Participation)
+
+```
+
+
+5)	Find the correlation between total_participation and Final Grade, compare this with correlation between DP and final grade and Lecture Participation vs final grade. Compare and your findings.
+
+```{r 8.5}
+
+cor(ACTIVE$total_participation,ACTIVE$final_grade)
+cor(ACTIVE$dpcount,ACTIVE$final_grade)
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$final_grade)
+
+```
+dp count has the highest.  total as well, but that is possibly because total is correlated with dp.
+
+
+Question 10) Which participation variable is the best predictor for final exam and final grade? 
+Total paricipation seems good based on boxplots, but dp count has slightly higher correlation.
+I would probably also want this to show total participation more correlated for final exam.
+```{r 8.6}
+
+cor(ACTIVE$total_participation,ACTIVE$FINALEXAM)
+cor(ACTIVE$dpcount,ACTIVE$FINALEXAM)
+cor(ACTIVE$LECTURE.PARTICIPATION,ACTIVE$FINALEXAM)
+
+```
+

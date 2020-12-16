@@ -1,0 +1,143 @@
+
+# setwd("C:/Users/TheEmbers/Desktop")  #Laptop
+# setwd("C:/Users/dembers/Documents/Spring 2020")  # UIC Office Computer
+# setwd("C:/Users/dembers/Documents") #Changes working directory #UIC LAB
+ setwd("C:/Users/lembe/OneDrive/Documents/Dale Teaching Spring 2020/Stat 382") # Den Computer
+
+
+#1) Read the file in R and create the initial dataframe called mydata.
+mydata <- read.csv("Project1.csv", sep =",")
+
+#2) Get the summary for each of the variables.
+
+summary(mydata)
+
+# Question 1) What issues do you observe with your data? What do you think are the steps you should take to prepare your data for analysis?
+
+# Lots of NA's, students that quit the course, 0 values for assignments.  One should fix the NAs and determine what to do with students who did not complete the
+# course or take the exam.
+
+# Clean up Data
+
+#1)	Replace all the missing data in all variables except TA and availability (a categorical variable) with a 0.
+
+mydata[c(3:56,58)][is.na(mydata[c(3:56,58)])]<-0
+
+# Taken from a student, this is much prettier.
+nacols <- names(mydata)
+nacols <- nacols[nacols != "Availability" & nacols != "TA.NUMBER"]
+mydata[nacols][is.na(mydata[nacols])] <- 0
+
+#2)	Save your data frame as mydataClean.  Keep a copy of the initial dataframe as is. You may need it later.
+mydataclean <- mydata
+
+# 3)	R cannot handle easily spaces in variable names.  Change the names of any variables with spaces in them. For example, Written Homework, Homework, Discussion grades. Change those to WH1, WH2, .. HK2.1, HK2.2 . DP1, . etc.
+
+# All the spaces got changed to peridos, so no issue.  To get rid of the periods one could have done:
+
+pre_names <- colnames(mydataclean)
+
+post_names <- gsub(".","",pre_names, fixed = TRUE)
+
+colnames(mydataclean) <- post_names  # Though probably not the best as want to keep some of the periods maybe.
+
+# THIS (FROM A STUDENT) IS ALSO NICE
+names <- colnames(mydataclean)
+names <- toupper(names)
+
+names <- gsub("WRITTEN.HW" , "WH" , names)
+names <- gsub("HW", "HK", names)
+names <- gsub("DISC", "DP", names)
+names <- gsub(".WK." , "" , names)
+names <- gsub("HK." , "HK" , names)
+names <- gsub("WH." , "WH" , names)
+names <- gsub("EXAM." , "EXAM" , names)
+names <- gsub("FINAL." , "FINAL" , names)
+
+colnames(mydataclean) <- names
+
+
+
+#4)	Print the mydataClean to the console. 
+
+mydataclean
+
+# 5)	Get the summary of mydataClean.
+
+summary(mydataclean)
+
+#PART 2
+
+#1)	Print out the total number of points that a student could have in this class by assuming 100 where you can and determining the maximum scores for the other assignments.
+
+maxexams <- 400
+maxdisc <- 1100
+
+written <-mydataclean[20:30]
+
+writmax <- apply(written, 2, max)
+
+maxwrit <- sum(writmax)
+
+hw <-mydataclean[31:56]
+hwmax <- apply(hw, 2, max)
+maxhw <- sum(hwmax)
+
+
+maxpoints <- maxexams+maxdisc+maxwrit+maxhw  #Note, I did not include lecture participation.  OK if one did.
+
+maxpoints
+
+#2)	Create a Homework Average variable that includes all grades for homework, note that each homework has different number of points, thus they have a different weight on the HW grade.
+
+mydataclean$hw_avg <- rowSums(mydataclean[31:56])/maxhw*100
+
+
+#3)	Create a Written Homework Average variable that includes all grades for Written Homework, note that each homework has different number of points thus they have a different weight on the WH grade.
+
+mydataclean$written_avg <- rowSums(mydataclean[20:30])/maxwrit*100
+
+
+#4)	Create a Discussion Average variable that includes all grades for Discussion
+
+mydataclean$discussion <- rowSums(mydataclean[9:19])/1100*100
+
+#5)Create a DP column, that counts the number of times that a student was present in Discussions, independently from the grade he received.  If there is a score, assume they were present.
+
+mydataclean$dpcount <-rowSums(mydataclean[9:19]>0)
+
+#6)Create a Final Grade column that calculates the grade of the students based on all of the assignments, using the weights in the table.
+
+mydataclean$final_grade <- mydataclean$hw_avg*0.1 + mydataclean$written_avg*0.1 +mydataclean$discussion*.1 + mydataclean$EXAM1*.15 + mydataclean$EXAM2*.15 + mydataclean$EXAM3*.15 + mydataclean$FINALEXAM*.25
+
+#7)Create a summary of all variables.
+summary(mydataclean)
+
+mydataFinal <- mydataclean
+
+#PART 3
+#1)	Create a dataframe ACTIVE, that includes only the students for whom their availability is YES
+
+ACTIVE <- mydataFinal[mydataFinal$Availability == "Yes",]
+
+#2)	Create a dataframe INACTIVE, that includes only the students for whom their availability is NO
+
+INACTIVE <- mydataFinal[mydataFinal$Availability == "No",]
+
+#3)	Create a Summary for ACTIVE. Review the means/median and max for each Exam, and Final and Final Grades and compare with the measures from Part 2/step7.
+ 
+summary(ACTIVE)
+
+# Gonna shrink this.  tooo many numbers.
+
+summary(ACTIVE[c(4:7,63)])
+summary(mydataFinal[c(4:7,63)])
+
+
+# Question 2.  Compare.  Means and medians are higher for ACTIVE.  Those folks finished the class.
+
+
+#4)	Create three datafiles (csv):  mydataFinal, ACTIVE and INACTIVE.
+write.csv(mydataFinal, file = "mydataFinal.csv")
+write.csv(ACTIVE, file = "ACTIVE.csv")
+write.csv(INACTIVE, file = "INACTIVE.csv")
